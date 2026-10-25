@@ -1,0 +1,31 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: iot-mosquitto
+    ports:
+      - "127.0.0.1:1883:1883"
+      - "8883:8883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./certs:/mosquitto/certs
+      - mosquitto_data:/mosquitto/data
+    restart: unless-stopped
+
+  openhab:
+    image: openhab/openhab:4.1.0
+    container_name: iot-openhab
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./openhab/conf:/openhab/conf
+      - ./openhab/userdata:/openhab/userdata
+      - ./openhab/addons:/openhab/addons
+      - ./certs:/openhab/certs
+    environment:
+      - USER_ID=1000
+      - GROUP_ID=1000
+      - JAVA_OPTS=-Duser.timezone=Europe/Kiev
+    restart: unless-stopped
+
+volumes:
+  mosquitto_data:
