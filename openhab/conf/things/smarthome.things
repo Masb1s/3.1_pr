@@ -20,7 +20,7 @@ Bridge mqtt:broker:localBroker "Local MQTT Broker" [
     Thing topic living_light "Світло вітальні" @ "Вітальня" {
         Channels:
             Type switch : state [ stateTopic="home/living_room/light/state", transformationPattern="JSONPATH:$.state" ]
-            Type dimmer : brightness [ stateTopic="home/living_room/light/state", transformationPattern="JSONPATH:$.brightness" ]
+            Type dimmer : brightness [ stateTopic="home/living_room/light/state", transformationPattern="JSONPATH:$.brightness", commandTopic="home/living_room/light/set", formatBeforePublish="{\"brightness\":%s}" ]
             Type switch : set [ commandTopic="home/living_room/light/set", formatBeforePublish="{\"state\":\"%s\"}" ]
     }
 

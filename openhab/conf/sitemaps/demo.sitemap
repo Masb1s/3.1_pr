@@ -1,5 +1,6 @@
 sitemap demo label="Розумна квартира (Варіант 1)" {
     Frame label="Огляд" {
+        Text item=Alarm icon="alarm" labelcolor=[ON="red"]
         Text item=CurrentTemp icon="temperature"
         Text item=LivingLux icon="sun"
         Text item=PowerUsage icon="energy"

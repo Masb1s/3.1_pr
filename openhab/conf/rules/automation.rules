@@ -24,26 +24,24 @@ rule "Режим Економ при відсутності руху"
 when
     Item LivingMotion changed to OFF
 then
-    val timer = createTimer(now.plusMinutes(1), [|
-        if (LivingMotion.state == OFF) {
+    createTimer(now.plusMinutes(1), [|
+        if (LivingMotion.state == OFF && EcoMode.state != ON) {
             logInfo("Automation", "Нікого немає. Активація режиму Економ (17°C)")
             HeaterSetpoint.sendCommand(17.0)
+            EcoMode.sendCommand(ON)
         }
     ])
-    cache.put("absenceTimer", timer)
 end
 
 rule "Скасування режиму Економ при появі руху"
 when
     Item LivingMotion changed to ON
 then
-    val timer = cache.get("absenceTimer") as Timer
-    if (timer !== null) {
-        timer.cancel()
-        cache.remove("absenceTimer")
+    if (EcoMode.state == ON) {
+        logInfo("Automation", "Людина повернулася. Встановлюємо комфортні 21°C")
+        HeaterSetpoint.sendCommand(21.0)
+        EcoMode.sendCommand(OFF)
     }
-    logInfo("Automation", "Людина повернулася. Встановлюємо комфортні 21°C")
-    HeaterSetpoint.sendCommand(21.0)
 end
 
 rule "Захист від перевантаження мережі"
@@ -52,21 +50,24 @@ when
 then
     if (PowerUsage.state !== NULL && PowerUsage.state !== UNDEF) {
         if ((PowerUsage.state as Number).intValue > 2500) {
-            if (cache.get("overloadTimer") === null) {
-                logWarn("Security", "УВАГА: Потужність {} Вт. Очікуємо 15 секунд...", PowerUsage.state)
-                val timer = createTimer(now.plusSeconds(15), [|
-                    logWarn("Security", "КРИТИЧНЕ ПЕРЕВАНТАЖЕННЯ! Вимкнення обігрівача.")
-                    HeaterSet.sendCommand(OFF)
-                    cache.remove("overloadTimer")
+            if (Alarm.state != ON) {
+                logWarn("Security", "УВАГА: Потужність >2500 Вт. Очікуємо 15 секунд...")
+                Alarm.sendCommand(ON)
+                
+                createTimer(now.plusSeconds(15), [|
+                    if (PowerUsage.state !== NULL && (PowerUsage.state as Number).intValue > 2500) {
+                        logWarn("Security", "КРИТИЧНЕ ПЕРЕВАНТАЖЕННЯ! Вимкнення обігрівача.")
+                        HeaterSet.sendCommand(OFF)
+                    } else {
+                        logInfo("Security", "Потужність впала до норми. Скасування тривоги.")
+                        Alarm.sendCommand(OFF)
+                    }
                 ])
-                cache.put("overloadTimer", timer)
             }
         } else {
-            val timer = cache.get("overloadTimer") as Timer
-            if (timer !== null) {
-                logInfo("Security", "Потужність в нормі ({} Вт). Таймер скасовано.", PowerUsage.state)
-                timer.cancel()
-                cache.remove("overloadTimer")
+            if (Alarm.state == ON) {
+                logInfo("Security", "Потужність в нормі. Тривога скасована.")
+                Alarm.sendCommand(OFF)
             }
         }
     }

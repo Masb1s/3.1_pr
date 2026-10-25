@@ -11,6 +11,8 @@ Switch LivingLight "Світло [%s]" <lightbulb> (gLights) { channel="mqtt:top
 Dimmer LivingBrightness "Яскравість [%d %%]" <slider> (gLights) { channel="mqtt:topic:localBroker:living_light:brightness" }
 Switch LivingLightSet { channel="mqtt:topic:localBroker:living_light:set" }
 
+Switch Alarm "ТРИВОГА [%s]" <alarm> (gSensors)
+
 Number CurrentTemp "Температура [%.1f °C]" <temperature> (gClimate) { channel="mqtt:topic:localBroker:climate:temperature" }
 
 Switch HeaterState "Обігрівач [%s]" <fire> (gClimate) { channel="mqtt:topic:localBroker:heater:state" }
@@ -18,3 +20,4 @@ Switch HeaterSet { channel="mqtt:topic:localBroker:heater:set" }
 Number HeaterSetpoint "Уставка [%.1f °C]" <temperature> (gClimate) { channel="mqtt:topic:localBroker:heater:setpoint" }
 
 Number PowerUsage "Потужність [%d W]" <energy> (gEnergy) { channel="mqtt:topic:localBroker:power:telemetry" }
+Switch EcoMode "Економ-режим [%s]" <price> (gClimate)

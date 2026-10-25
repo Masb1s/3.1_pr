@@ -101,8 +101,11 @@ class SmartHomeSimulator:
             self.publish_telemetry("living_room", "motion", "OFF", "string")
             
         elif scenario == "overload":
-            self.state["power"] = 2800
-            self.publish_telemetry("main", "power", 2800, "W")
+            print("Імітація перевантаження: тримаємо 2800 Вт протягом 20 секунд..")
+            for _ in range(10): # 10 разів по 2 секунди = 20 секунд
+                self.state["power"] = 2800
+                self.publish_telemetry("main", "power", 2800, "W")
+                time.sleep(2)
             
         elif scenario == "nobody_home":
             self.state["living_motion"] = False
