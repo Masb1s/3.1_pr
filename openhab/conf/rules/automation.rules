@@ -1,0 +1,73 @@
+rule "Автоматичне освітлення за рухом та освітленістю"
+when
+    Item LivingMotion changed to ON
+then
+    if (LivingLux.state !== NULL && LivingLux.state !== UNDEF) {
+        if ((LivingLux.state as Number).intValue < 50) {
+            LivingLightSet.sendCommand(ON)
+            LivingBrightness.sendCommand(70)
+            logInfo("Automation", "Рух і темно (<50 лк). Світло увімкнено на 70%")
+            
+            createTimer(now.plusSeconds(30), [|
+                if (LivingMotion.state == OFF) {
+                    LivingLightSet.sendCommand(OFF)
+                    logInfo("Automation", "Руху немає. Світло вимкнено")
+                }
+            ])
+        } else {
+            logInfo("Automation", "Рух є, але достатньо світла ({} лк). Світло не вмикаємо", LivingLux.state)
+        }
+    }
+end
+
+rule "Режим Економ при відсутності руху"
+when
+    Item LivingMotion changed to OFF
+then
+    val timer = createTimer(now.plusMinutes(1), [|
+        if (LivingMotion.state == OFF) {
+            logInfo("Automation", "Нікого немає. Активація режиму Економ (17°C)")
+            HeaterSetpoint.sendCommand(17.0)
+        }
+    ])
+    cache.put("absenceTimer", timer)
+end
+
+rule "Скасування режиму Економ при появі руху"
+when
+    Item LivingMotion changed to ON
+then
+    val timer = cache.get("absenceTimer") as Timer
+    if (timer !== null) {
+        timer.cancel()
+        cache.remove("absenceTimer")
+    }
+    logInfo("Automation", "Людина повернулася. Встановлюємо комфортні 21°C")
+    HeaterSetpoint.sendCommand(21.0)
+end
+
+rule "Захист від перевантаження мережі"
+when
+    Item PowerUsage received update
+then
+    if (PowerUsage.state !== NULL && PowerUsage.state !== UNDEF) {
+        if ((PowerUsage.state as Number).intValue > 2500) {
+            if (cache.get("overloadTimer") === null) {
+                logWarn("Security", "УВАГА: Потужність {} Вт. Очікуємо 15 секунд...", PowerUsage.state)
+                val timer = createTimer(now.plusSeconds(15), [|
+                    logWarn("Security", "КРИТИЧНЕ ПЕРЕВАНТАЖЕННЯ! Вимкнення обігрівача.")
+                    HeaterSet.sendCommand(OFF)
+                    cache.remove("overloadTimer")
+                ])
+                cache.put("overloadTimer", timer)
+            }
+        } else {
+            val timer = cache.get("overloadTimer") as Timer
+            if (timer !== null) {
+                logInfo("Security", "Потужність в нормі ({} Вт). Таймер скасовано.", PowerUsage.state)
+                timer.cancel()
+                cache.remove("overloadTimer")
+            }
+        }
+    }
+end
