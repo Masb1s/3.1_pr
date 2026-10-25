@@ -1,0 +1,17 @@
+user admin
+topic readwrite #
+
+user openhab
+topic read home/+/+/telemetry
+topic read home/+/+/state
+topic read home/+/+/status
+topic write home/+/+/set
+
+user sensor_living_motion
+topic write home/living_room/motion/telemetry
+topic write home/living_room/motion/status
+
+user actuator_living_light
+topic read home/living_room/light/set
+topic write home/living_room/light/state
+topic write home/living_room/light/status
