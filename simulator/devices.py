@@ -13,7 +13,7 @@ PORT = 8883
 
 class SmartHomeSimulator:
     def __init__(self):
-        # Унікальний ID для кожного запуску, щоб сценарії не відключали один одного
+        # Унікальний ID для кожного запуску
         unique_id = f"sim_{uuid.uuid4().hex[:6]}"
         self.client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1, client_id=unique_id)
         self.client.tls_set(ca_certs=CA_CERT)
@@ -40,6 +40,11 @@ class SmartHomeSimulator:
     def on_connect(self, client, userdata, flags, rc):
         print(f"✅ Підключено до MQTT (TLS) з кодом {rc}")
         self.client.publish("home/main/simulator/status", "online", qos=1, retain=True)
+        
+        # Відправляємо початковий стан пристроїв, щоб OpenHAB їх одразу побачив
+        self.publish_state("living_room", "light", self.state["living_light"])
+        self.publish_state("living_room", "heater", self.state["heater"])
+        
         client.subscribe("home/+/+/set")
 
     def on_message(self, client, userdata, msg):
@@ -48,11 +53,24 @@ class SmartHomeSimulator:
         payload = json.loads(msg.payload.decode())
         
         if device == "light":
-            self.state["living_light"]["state"] = payload.get("state", "OFF")
+            # Якщо надійшла команда вимкнути/увімкнути
+            if "state" in payload:
+                self.state["living_light"]["state"] = payload["state"]
+                if payload["state"] == "OFF":
+                    self.state["living_light"]["brightness"] = 0
+                elif payload["state"] == "ON" and self.state["living_light"]["brightness"] == 0:
+                    self.state["living_light"]["brightness"] = 100
+
+            # Якщо надійшла команда змінити яскравість
             if "brightness" in payload:
-                self.state["living_light"]["brightness"] = payload["brightness"]
+                self.state["living_light"]["brightness"] = int(payload["brightness"])
+                if int(payload["brightness"]) > 0:
+                    self.state["living_light"]["state"] = "ON"
+                else:
+                    self.state["living_light"]["state"] = "OFF"
+                    
             self.publish_state("living_room", "light", self.state["living_light"])
-            
+
         elif device == "heater":
             if "state" in payload:
                 self.state["heater"]["state"] = payload["state"]
@@ -61,7 +79,6 @@ class SmartHomeSimulator:
             self.publish_state("living_room", "heater", self.state["heater"])
 
     def publish_telemetry(self, zone, device, value, unit):
-        # Якщо значення число - округлюємо, якщо текст (ON/OFF) - залишаємо як є
         if isinstance(value, (int, float)):
             val = round(value, 1)
         else:
@@ -77,12 +94,10 @@ class SmartHomeSimulator:
         if scenario == "motion":
             self.state["living_motion"] = True
             self.state["living_lux"] = 20
-            # Відправляємо ON замість 1
             self.publish_telemetry("living_room", "motion", "ON", "string") 
             self.publish_telemetry("living_room", "lux", 20, "lx")
             time.sleep(5)
             self.state["living_motion"] = False
-            # Відправляємо OFF замість 0
             self.publish_telemetry("living_room", "motion", "OFF", "string")
             
         elif scenario == "overload":
@@ -119,6 +134,6 @@ if __name__ == "__main__":
     sim = SmartHomeSimulator()
     if args.scenario:
         sim.run_scenario(args.scenario)
-        time.sleep(2) # Даємо часу відправити дані перед закриттям
+        time.sleep(2)
     else:
         sim.run()

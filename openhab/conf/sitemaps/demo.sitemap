@@ -1,0 +1,19 @@
+sitemap demo label="Розумна квартира (Варіант 1)" {
+    Frame label="Огляд" {
+        Text item=CurrentTemp icon="temperature"
+        Text item=LivingLux icon="sun"
+        Text item=PowerUsage icon="energy"
+        Text item=LivingMotion icon="motion"
+    }
+    
+    Frame label="Керування" {
+        Switch item=LivingLight icon="lightbulb"
+        Slider item=LivingBrightness icon="slider"
+        Setpoint item=HeaterSetpoint minValue=16 maxValue=25 step=0.5 icon="temperature"
+        Switch item=HeaterState icon="fire"
+    }
+    
+    Frame label="Графік споживання (остання година)" {
+        Chart item=PowerUsage period=h refresh=5000
+    }
+}
