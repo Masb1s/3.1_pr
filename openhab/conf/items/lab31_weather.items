@@ -1,0 +1,24 @@
+Group  gLab31Http  "HTTP Weather API"
+
+Number Lab31ApiTemperature "API Temperature [%.1f °C]"  <temperature>  (gLab31Http)  { channel="http:url:lab31_weather:temperature" }
+Number Lab31ApiHumidity    "API Humidity [%.1f %%]"     <humidity>     (gLab31Http)  { channel="http:url:lab31_weather:humidity" }
+Number Lab31ApiPressure    "API Pressure [%.1f hPa]"    <pressure>     (gLab31Http)  { channel="http:url:lab31_weather:pressure" }
+Number Lab31ApiWindSpeed   "API Wind [%.1f m/s]"        <wind>         (gLab31Http)  { channel="http:url:lab31_weather:wind_speed" }
+String Lab31ApiStatus      "API Status [%s]"            <network>      (gLab31Http)  { channel="http:url:lab31_weather:api_status" }
+Number Lab31ApiUptime      "API Uptime [%d s]"          <time>         (gLab31Http)  { channel="http:url:lab31_weather:api_uptime" }
+Number Lab31DevicesOnline  "Devices Online [%d]"        <network>      (gLab31Http)  { channel="http:url:lab31_weather:devices_online" }
+Number Lab31DevicesTotal   "Devices Total [%d]"         <network>      (gLab31Http)  { channel="http:url:lab31_weather:devices_total" }
+
+Number Lab31MqttTemp       "MQTT Temp [%.1f °C]"        <temperature>  (gLab31Http)  { channel="mqtt:topic:lab31_broker:lab31_weather:temperature" }
+Number Lab31MqttHum        "MQTT Humidity [%.1f %%]"    <humidity>     (gLab31Http)  { channel="mqtt:topic:lab31_broker:lab31_weather:humidity" }
+Number Lab31MqttPressure   "MQTT Pressure [%.1f hPa]"   <pressure>     (gLab31Http)  { channel="mqtt:topic:lab31_broker:lab31_weather:pressure" }
+Number Lab31MqttRssi       "MQTT RSSI [%d dBm]"         <signal>       (gLab31Http)  { channel="mqtt:topic:lab31_broker:lab31_weather:rssi" }
+
+Number Lab31BleTemp        "BLE Temp [%.1f °C]"         <temperature>  (gLab31Http)
+Number Lab31BleHumidity    "BLE Humidity [%.1f %%]"     <humidity>     (gLab31Http)
+Number Lab31BleBattery     "BLE Battery [%d %%]"        <battery>      (gLab31Http)
+Number Lab31BleRssi        "BLE RSSI [%d dBm]"          <signal>       (gLab31Http)
+
+Number Lab31AvgTemp        "Avg Temp [%.1f °C]"         <temperature>
+Number Lab31Deviation      "Deviation [%.1f]"           <quality>
+String Lab31TestResult     "Test Result [%s]"           <shield>

@@ -1,0 +1,16 @@
+Thing http:url:lab31_weather "Weather REST API" [
+    baseURL="http://host.docker.internal:5000/api/weather",
+    refresh=30,
+    timeout=5000,
+    headers="X-API-Key=lab31-secret-key"
+] {
+    Channels:
+        Type number : temperature "Temperature" [ stateExtension="/current", stateTransformation="JSONPATH:$.temperature" ]
+        Type number : humidity "Humidity" [ stateExtension="/current", stateTransformation="JSONPATH:$.humidity" ]
+        Type number : pressure "Pressure" [ stateExtension="/current", stateTransformation="JSONPATH:$.pressure" ]
+        Type number : wind_speed "Wind Speed" [ stateExtension="/current", stateTransformation="JSONPATH:$.wind_speed" ]
+        Type string : api_status "API Status" [ stateExtension="/status", stateTransformation="JSONPATH:$.status" ]
+        Type number : api_uptime "API Uptime [s]" [ stateExtension="/status", stateTransformation="JSONPATH:$.uptime_seconds" ]
+        Type number : devices_online "Online Devices" [ stateExtension="/devices", stateTransformation="JSONPATH:$.online" ]
+        Type number : devices_total "Total Devices" [ stateExtension="/devices", stateTransformation="JSONPATH:$.total" ]
+}

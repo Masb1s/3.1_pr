@@ -1,0 +1,27 @@
+Bridge mqtt:broker:lab31_broker "Lab31 MQTT Broker" [
+    host="iot-mosquitto",
+    port=1883,
+    secure=false,
+    clientID="lab31_emulator",
+    username="admin",
+    password="SuperSecretAdminPass"
+] {
+    Thing topic lab31_weather "Lab31 Weather Sensors" {
+        Channels:
+            Type number : temperature "Temperature" [
+                stateTopic="lab31/weather/temperature",
+                transformationPattern="JSONPATH:$.value"
+            ]
+            Type number : humidity "Humidity" [
+                stateTopic="lab31/weather/humidity",
+                transformationPattern="JSONPATH:$.value"
+            ]
+            Type number : pressure "Pressure" [
+                stateTopic="lab31/weather/pressure",
+                transformationPattern="JSONPATH:$.value"
+            ]
+            Type number : rssi "RSSI" [
+                stateTopic="lab31/weather/rssi"
+            ]
+    }
+}

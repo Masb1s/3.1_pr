@@ -1,0 +1,24 @@
+rule "MQTT and BLE Emulator"
+when
+    Time cron "0/30 * * * * ?"
+then
+    val mqttT = 21.0 + (Math::random() * 4.0)
+    val mqttH = 50.0 + (Math::random() * 15.0)
+    postUpdate("Lab31MqttTemp", mqttT)
+    postUpdate("Lab31MqttHum", mqttH)
+
+    val bleT = 20.5 + (Math::random() * 3.0)
+    val bleB = 80 - (now.getMinute() % 10)
+    val bleR = -40 - (Math::random() * 30)
+    postUpdate("Lab31BleTemp", bleT)
+    postUpdate("Lab31BleBattery", bleB)
+    postUpdate("Lab31BleRssi", bleR)
+
+    if (Lab31ApiTemperature.state != NULL && Lab31ApiTemperature.state instanceof Number) {
+        val httpT = (Lab31ApiTemperature.state as Number).floatValue
+        val avg = (mqttT + bleT + httpT) / 3.0
+        val maxDev = Math::max(Math::abs(httpT - mqttT), Math::abs(httpT - bleT))
+        postUpdate("Lab31AvgTemp", avg)
+        postUpdate("Lab31Deviation", maxDev)
+    }
+end

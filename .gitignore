@@ -1,7 +1,5 @@
-.env
-certs/
-mosquitto/config/passwd
-openhab/userdata/
-openhab/addons/
-__pycache__/
-*.pyc
+openhab/userdata/ 
+openhab/addons/ 
+certs/ 
+__pycache__/ 
+*.pyc 
